@@ -1,17 +1,21 @@
 from django.db import models
 
 
-class AuctionCommon(models.Model):
-    class Meta:
-        abstract = True
+class Auction(models.Model):
 
-    PENDING = 1
-    IN_PROGRESS = 2
-    CLOSED = 3
+    PENDING = 0
+    IN_PROGRESS = 1
+    CLOSED = 2
     AUCTION_STATUS_CHOICES = (
         (PENDING, 'PENDING'),
         (IN_PROGRESS, 'IN PROGRESS'),
         (CLOSED, 'CLOSED'),
+    )
+
+    AUCTION_OPTION_CHOICES = (
+        (0, 'DUTCH'),
+        (1, 'ENGLISH'),
+
     )
 
     start_price = models.DecimalField(
@@ -25,18 +29,24 @@ class AuctionCommon(models.Model):
         choices=AUCTION_STATUS_CHOICES,
         default=PENDING,
     )
-
-
-class EnglishAuction(AuctionCommon):
+    option = models.IntegerField(
+        choices=AUCTION_OPTION_CHOICES,
+    )
     buy_it_now = models.DecimalField(
         max_digits=6,
-        decimal_places=2
+        decimal_places=2,
+        null=True,
     )
-
-
-class DutchAuction(AuctionCommon):
     end_price = models.DecimalField(
         max_digits=6,
-        decimal_places=2
+        decimal_places=2,
+        null=True
     )
-    frequency = models.IntegerField()
+    frequency = models.IntegerField(
+        null=True
+    )
+
+    def is_english_auction(self):
+        if self.AUCTION_OPTION_CHOICES:
+            return True
+        return False

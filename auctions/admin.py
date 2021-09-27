@@ -1,13 +1,8 @@
 from django.contrib import admin
 
-from .models import EnglishAuction, DutchAuction
+from .models import Auction
 
 
-@admin.register(EnglishAuction)
-class EnglishAuctionAdmin(admin.ModelAdmin):
-    pass
-
-
-@admin.register(DutchAuction)
-class DutchAuctionAdmin(admin.ModelAdmin):
+@admin.register(Auction)
+class AuctionAdmin(admin.ModelAdmin):
     pass
