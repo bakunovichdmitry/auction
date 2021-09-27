@@ -3,7 +3,7 @@ from django.template.defaultfilters import truncatechars
 
 
 class Item(models.Model):
-    photo = models.ImageField(upload_to='items/photo')
+    photo = models.ImageField(upload_to='items-photo')
     title = models.CharField(max_length=128)
     description = models.TextField()
 
