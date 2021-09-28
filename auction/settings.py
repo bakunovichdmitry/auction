@@ -33,12 +33,14 @@ ALLOWED_HOSTS = ['localhost', '0.0.0.0']
 INSTALLED_APPS = [
     'items.apps.ItemsConfig',
     'auctions.apps.AuctionsConfig',
+    'lots.apps.LotsConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [

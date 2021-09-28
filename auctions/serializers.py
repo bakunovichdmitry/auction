@@ -1,11 +1,11 @@
 from rest_framework import serializers
 
-from .models import Item
+from .models import Auction
 
 
-class ItemSerializer(serializers.ModelSerializer):
+class AuctionSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Item
+        model = Auction
         fields = '__all__'
         read_only_fields = (
             'id',
