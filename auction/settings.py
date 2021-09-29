@@ -31,16 +31,23 @@ ALLOWED_HOSTS = ['localhost', '0.0.0.0']
 # Application definition
 
 INSTALLED_APPS = [
+
+    # Created applications
     'items.apps.ItemsConfig',
     'auctions.apps.AuctionsConfig',
     'lots.apps.LotsConfig',
+
+    # Django applications
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    # Other applications
     'rest_framework',
+    'django_filters',
 ]
 
 MIDDLEWARE = [

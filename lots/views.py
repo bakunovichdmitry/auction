@@ -1,27 +1,28 @@
 from rest_framework import generics
 from rest_framework.permissions import AllowAny
-# from rest_framework.response import Response
 from rest_framework import filters
+from rest_framework import pagination
+from django_filters.rest_framework import DjangoFilterBackend
 
 from .serializers import LotSerializer
 from .models import Lot
 
 
-class LotListView(generics.ListCreateAPIView):
+class LotListView(generics.ListAPIView):
     permission_classes = [AllowAny]
     queryset = Lot.objects.all()
     serializer_class = LotSerializer
+    pagination_class = pagination.LimitOffsetPagination
+
     filter_backends = (
         filters.OrderingFilter,
+        DjangoFilterBackend
     )
     ordering_fields = (
         'auction__closing_date',
-        'auction__end_price'
+        'auction__current_price',
     )
-    # pagination_class =
-
-    # def list(self, request):
-    #     # Note the use of `get_queryset()` instead of `self.queryset`
-    #     queryset = self.get_queryset()
-    #     serializer = self.serializer_class(queryset, many=True)
-    #     return Response(serializer.data)
+    filterset_fields = [
+        'auction__status',
+        'auction__option',
+    ]

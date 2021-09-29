@@ -19,8 +19,14 @@ class Auction(models.Model):
     )
 
     start_price = models.DecimalField(
-        max_digits=6,
+        max_digits=10,
         decimal_places=2
+    )
+    current_price = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        null=True,
+        default=None
     )
     step = models.IntegerField()
     opening_date = models.DateTimeField()
@@ -33,12 +39,12 @@ class Auction(models.Model):
         choices=AUCTION_OPTION_CHOICES,
     )
     buy_it_now = models.DecimalField(
-        max_digits=6,
+        max_digits=10,
         decimal_places=2,
         null=True,
     )
     end_price = models.DecimalField(
-        max_digits=6,
+        max_digits=10,
         decimal_places=2,
         null=True
     )
