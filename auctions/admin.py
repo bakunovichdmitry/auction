@@ -6,6 +6,7 @@ from lots.models import Lot
 
 class LotInline(admin.StackedInline):
     model = Lot
+    extra = 0
 
 
 @admin.register(Auction)

@@ -25,8 +25,9 @@ class Auction(models.Model):
     current_price = models.DecimalField(
         max_digits=10,
         decimal_places=2,
+        blank=True,
         null=True,
-        default=None
+        default=None,
     )
     step = models.IntegerField()
     opening_date = models.DateTimeField()
@@ -41,15 +42,18 @@ class Auction(models.Model):
     buy_it_now = models.DecimalField(
         max_digits=10,
         decimal_places=2,
+        blank=True,
         null=True,
     )
     end_price = models.DecimalField(
         max_digits=10,
         decimal_places=2,
-        null=True
+        blank=True,
+        null=True,
     )
     frequency = models.IntegerField(
-        null=True
+        blank=True,
+        null=True,
     )
 
     def is_english_auction(self):
