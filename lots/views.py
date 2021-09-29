@@ -1,5 +1,5 @@
 from rest_framework import generics
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework import filters
 from rest_framework import pagination
 from django_filters.rest_framework import DjangoFilterBackend
@@ -9,10 +9,11 @@ from .models import Lot
 
 
 class LotListView(generics.ListAPIView):
-    permission_classes = [AllowAny]
     queryset = Lot.objects.all()
     serializer_class = LotSerializer
     pagination_class = pagination.LimitOffsetPagination
+    # permission_classes = (AllowAny,)
+    permission_classes = (IsAuthenticated,)
 
     filter_backends = (
         filters.OrderingFilter,
