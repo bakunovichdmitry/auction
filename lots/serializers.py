@@ -6,12 +6,13 @@ from auctions.serializers import AuctionSerializer
 
 
 class LotSerializer(serializers.ModelSerializer):
-    item = ItemSerializer()
-    auction = AuctionSerializer()
+    item = ItemSerializer(many=False)
+    auction = AuctionSerializer(many=False)
 
     class Meta:
         model = Lot
         fields = (
+            'unique_id',
             'item',
             'auction',
         )

@@ -1,23 +1,26 @@
+from enum import Enum
+
 from django.db import models
 
 
-class Auction(models.Model):
+class BaseChoiceEnum(Enum):
+    @classmethod
+    def choices(cls):
+        return tuple((i.name, i.value) for i in cls)
 
+
+class AuctionStatusChoice(BaseChoiceEnum):
     PENDING = 0
     IN_PROGRESS = 1
     CLOSED = 2
-    AUCTION_STATUS_CHOICES = (
-        (PENDING, 'PENDING'),
-        (IN_PROGRESS, 'IN PROGRESS'),
-        (CLOSED, 'CLOSED'),
-    )
 
-    AUCTION_OPTION_CHOICES = (
-        (0, 'DUTCH'),
-        (1, 'ENGLISH'),
 
-    )
+class AuctionTypeChoice(BaseChoiceEnum):
+    DUTCH = 0
+    ENGLISH = 1
 
+
+class Auction(models.Model):
     start_price = models.DecimalField(
         max_digits=10,
         decimal_places=2
@@ -33,13 +36,13 @@ class Auction(models.Model):
     opening_date = models.DateTimeField()
     closing_date = models.DateTimeField()
     status = models.IntegerField(
-        choices=AUCTION_STATUS_CHOICES,
-        default=PENDING,
+        choices=AuctionStatusChoice.choices(),
+        default=AuctionStatusChoice.PENDING,
     )
-    option = models.IntegerField(
-        choices=AUCTION_OPTION_CHOICES,
+    type = models.IntegerField(
+        choices=AuctionTypeChoice.choices(),
     )
-    buy_it_now = models.DecimalField(
+    buy_now_price = models.DecimalField(
         max_digits=10,
         decimal_places=2,
         blank=True,
@@ -55,8 +58,3 @@ class Auction(models.Model):
         blank=True,
         null=True,
     )
-
-    def is_english_auction(self):
-        if self.AUCTION_OPTION_CHOICES:
-            return True
-        return False
