@@ -39,4 +39,3 @@ class LotDetailView(APIView):
         )
         serializer = LotSerializer(lot)
         return Response(serializer.data)
-

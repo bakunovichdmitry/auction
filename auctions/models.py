@@ -1,26 +1,32 @@
-from enum import Enum
+import uuid
+from enum import IntEnum
 
 from django.db import models
 
 
-class BaseChoiceEnum(Enum):
+class BaseIntEnumChoice(IntEnum):
     @classmethod
     def choices(cls):
-        return tuple((i.name, i.value) for i in cls)
+        return [(key.value, key.name) for key in cls]
 
 
-class AuctionStatusChoice(BaseChoiceEnum):
+class AuctionStatusChoice(BaseIntEnumChoice):
     PENDING = 0
     IN_PROGRESS = 1
     CLOSED = 2
 
 
-class AuctionTypeChoice(BaseChoiceEnum):
+class AuctionTypeChoice(BaseIntEnumChoice):
     DUTCH = 0
     ENGLISH = 1
 
 
 class Auction(models.Model):
+    unique_id = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False
+    )
     start_price = models.DecimalField(
         max_digits=10,
         decimal_places=2
@@ -41,6 +47,7 @@ class Auction(models.Model):
     )
     type = models.IntegerField(
         choices=AuctionTypeChoice.choices(),
+        default=AuctionTypeChoice.ENGLISH,
     )
     buy_now_price = models.DecimalField(
         max_digits=10,
@@ -58,3 +65,16 @@ class Auction(models.Model):
         blank=True,
         null=True,
     )
+
+    def buy_item_now(self):
+        self.status = AuctionStatusChoice.CLOSED
+        self.current_price = self.buy_now_price
+        self.save()
+
+    def make_offer(self, raise_price):
+        # print(raise_price, self.step, self.status, self.type == AuctionTypeChoice.ENGLISH)
+        if self.type == AuctionTypeChoice.ENGLISH and raise_price < self.step:
+            return False
+        self.current_price += raise_price
+        self.save()
+        return True
