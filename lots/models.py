@@ -19,3 +19,7 @@ class Lot(models.Model):
         on_delete=models.CASCADE,
         # related_name='lots'
     )
+
+
+class LotHistory(models.Model):
+    created = models.DateTimeField(auto_now_add=True)
