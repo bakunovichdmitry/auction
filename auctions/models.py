@@ -1,6 +1,7 @@
 import uuid
 from enum import IntEnum
 
+from django.contrib.auth.models import User
 from django.db import models
 
 
@@ -69,12 +70,41 @@ class Auction(models.Model):
     def buy_item_now(self):
         self.status = AuctionStatusChoice.CLOSED
         self.current_price = self.buy_now_price
-        self.save()
+        self.save(
+            update_fields=(
+                'status',
+                'current_price',
+            )
+        )
 
-    def make_offer(self, raise_price):
-        # print(raise_price, self.step, self.status, self.type == AuctionTypeChoice.ENGLISH)
+    def make_offer(self, raise_price, user):
         if self.type == AuctionTypeChoice.ENGLISH and raise_price < self.step:
-            return False
+            raise ValueError
         self.current_price += raise_price
-        self.save()
-        return True
+        self.history.create(
+            new_price=self.current_price,
+            auction=self,
+            user=user
+        )
+        self.save(
+            update_fields=(
+                'current_price',
+            )
+        )
+
+
+class AuctionHistory(models.Model):
+    new_price = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+    )
+    created = models.DateTimeField(auto_now_add=True)
+    auction = models.ForeignKey(
+        'auctions.Auction',
+        on_delete=models.CASCADE,
+        related_name='history'
+    )
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+    )

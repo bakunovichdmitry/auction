@@ -24,7 +24,7 @@ services:
     restart: always
     build:
       context: .
-    command: celery -A auction worker -l info
+    command: celery -A auction worker -B -l info
     volumes:
       - .:/app
     depends_on:
