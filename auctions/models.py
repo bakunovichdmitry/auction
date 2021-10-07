@@ -1,23 +1,18 @@
 import uuid
-from enum import IntEnum
 
 from django.contrib.auth.models import User
 from django.db import models
 
+from .utils import BaseEnumChoice
+from .tasks import send_reject_mail
 
-class BaseIntEnumChoice(IntEnum):
-    @classmethod
-    def choices(cls):
-        return [(key.value, key.name) for key in cls]
-
-
-class AuctionStatusChoice(BaseIntEnumChoice):
+class AuctionStatusChoice(BaseEnumChoice):
     PENDING = 0
     IN_PROGRESS = 1
     CLOSED = 2
 
 
-class AuctionTypeChoice(BaseIntEnumChoice):
+class AuctionTypeChoice(BaseEnumChoice):
     DUTCH = 0
     ENGLISH = 1
 
@@ -39,7 +34,13 @@ class Auction(models.Model):
         null=True,
         default=None,
     )
-    step = models.IntegerField()
+    step = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        blank=True,
+        null=True,
+        default=None,
+    )
     opening_date = models.DateTimeField()
     closing_date = models.DateTimeField()
     status = models.IntegerField(
@@ -66,6 +67,8 @@ class Auction(models.Model):
         blank=True,
         null=True,
     )
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
 
     def buy_item_now(self):
         self.status = AuctionStatusChoice.CLOSED
@@ -74,22 +77,32 @@ class Auction(models.Model):
             update_fields=(
                 'status',
                 'current_price',
+                'updated',
             )
         )
 
     def make_offer(self, raise_price, user):
+        # TODO: validator raise_price
         if self.type == AuctionTypeChoice.ENGLISH and raise_price < self.step:
             raise ValueError
         self.current_price += raise_price
-        self.history.create(
-            new_price=self.current_price,
-            auction=self,
-            user=user
-        )
+
+        # self.history.first()
+
+        self.create_history(user)
         self.save(
             update_fields=(
                 'current_price',
+                'updated',
             )
+        )
+        send_reject_mail.delay('dv.bakunovich@gmail.com')
+
+    def create_history(self, user):
+        AuctionHistory.objects.create(
+            new_price=self.current_price,
+            auction=self,
+            user=user
         )
 
 
