@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from django.db import models
 
 from .utils import BaseEnumChoice
-from .tasks import send_reject_mail
+
 
 class AuctionStatusChoice(BaseEnumChoice):
     PENDING = 0
@@ -80,14 +80,15 @@ class Auction(models.Model):
                 'updated',
             )
         )
+        # send_lot_sold_mail.delay(previous_offer_user_mail)
 
     def make_offer(self, raise_price, user):
-        # TODO: validator raise_price
+        # TODO: validate raise_price
         if self.type == AuctionTypeChoice.ENGLISH and raise_price < self.step:
             raise ValueError
         self.current_price += raise_price
 
-        # self.history.first()
+        # previous_offer_user_mail = self.history.last().user.email
 
         self.create_history(user)
         self.save(
@@ -96,7 +97,22 @@ class Auction(models.Model):
                 'updated',
             )
         )
-        send_reject_mail.delay('dv.bakunovich@gmail.com')
+        # send_mail.delay('dv.bakunovich@gmail.com')
+
+        # send_reject_mail.delay(previous_offer_user_mail)
+
+    def update_price(self):
+        self.current_price -= self.step
+        if self.current_price < self.end_price:
+            self.status = AuctionStatusChoice.CLOSED
+            raise ValueError
+        self.save(
+            update_fields=(
+                'current_price',
+                'updated',
+            )
+        )
+
 
     def create_history(self, user):
         AuctionHistory.objects.create(

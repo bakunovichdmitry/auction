@@ -9,6 +9,8 @@ from .serializers import AuctionSerializer, AuctionHistorySerializer
 
 
 class BuyItNowView(APIView):
+    permission_classes = (IsAuthenticated,)
+
     def post(self, request, unique_id):
         auction = get_object_or_404(
             Auction,
@@ -42,5 +44,3 @@ class AuctionHistoryView(generics.ListAPIView):
     queryset = AuctionHistory.objects.select_related('auction', 'user').order_by('-created').all()
     serializer_class = AuctionHistorySerializer
     pagination_class = pagination.LimitOffsetPagination
-    permission_classes = (AllowAny,)
-
