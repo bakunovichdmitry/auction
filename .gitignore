@@ -1,3 +1,4 @@
+auction/setting_local.py
 media/
 celerybeat-schedule
 

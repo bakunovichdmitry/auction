@@ -84,11 +84,11 @@ class Auction(models.Model):
 
     def make_offer(self, raise_price, user):
         # TODO: validate raise_price
-        if self.type == AuctionTypeChoice.ENGLISH and raise_price < self.step:
+        if self.type == AuctionTypeChoice.ENGLISH.value and raise_price < self.step:
             raise ValueError
         self.current_price += raise_price
 
-        # previous_offer_user_mail = self.history.last().user.email
+        previous_offer_user_mail = self.history.last().user.email
 
         self.create_history(user)
         self.save(
@@ -97,9 +97,13 @@ class Auction(models.Model):
                 'updated',
             )
         )
-        # send_mail.delay('dv.bakunovich@gmail.com')
 
-        # send_reject_mail.delay(previous_offer_user_mail)
+        from .tasks import send_mail
+        send_mail.delay(
+            'offer',
+            'u office was rejected',
+            previous_offer_user_mail
+        )
 
     def update_price(self):
         self.current_price -= self.step
