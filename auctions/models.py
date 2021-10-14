@@ -3,8 +3,9 @@ import uuid
 from django.contrib.auth.models import User
 from django.db import models
 
+from .emails import send_rejected_mail, send_sold_mail
 from .utils import BaseEnumChoice
-
+from .tasks import work_with_auction
 
 class AuctionStatusChoice(BaseEnumChoice):
     PENDING = 0
@@ -70,7 +71,7 @@ class Auction(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
-    def buy_item_now(self):
+    def buy_item_now(self, user):
         self.status = AuctionStatusChoice.CLOSED
         self.current_price = self.buy_now_price
         self.save(
@@ -80,15 +81,15 @@ class Auction(models.Model):
                 'updated',
             )
         )
-        # send_lot_sold_mail.delay(previous_offer_user_mail)
+        send_sold_mail.delay(user)
 
     def make_offer(self, raise_price, user):
-        # TODO: validate raise_price
         if self.type == AuctionTypeChoice.ENGLISH.value and raise_price < self.step:
             raise ValueError
         self.current_price += raise_price
 
-        previous_offer_user_mail = self.history.last().user.email
+
+        # previous_offer_user_mail = self.history.last().user.email if self.history.last() else None
 
         self.create_history(user)
         self.save(
@@ -98,12 +99,16 @@ class Auction(models.Model):
             )
         )
 
-        from .tasks import send_mail
-        send_mail.delay(
-            'offer',
-            'u office was rejected',
-            previous_offer_user_mail
-        )
+        if self.type == AuctionTypeChoice.ENGLISH.value:
+            work_with_auction.apply_async(
+                [self.unique_id, user.id],
+                countdown=5
+            )
+            pass
+        # if previous_offer_user_mail:
+        #     send_rejected_mail.delay(
+        #         previous_offer_user_mail
+        #     )
 
     def update_price(self):
         self.current_price -= self.step
@@ -116,7 +121,6 @@ class Auction(models.Model):
                 'updated',
             )
         )
-
 
     def create_history(self, user):
         AuctionHistory.objects.create(

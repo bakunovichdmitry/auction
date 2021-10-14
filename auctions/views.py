@@ -16,7 +16,9 @@ class BuyItNowView(APIView):
             Auction,
             pk=unique_id
         )
-        auction.buy_item_now()
+        auction.buy_item_now(
+            request.user
+        )
         serializer = AuctionSerializer(auction)
         return Response(serializer.data)
 
