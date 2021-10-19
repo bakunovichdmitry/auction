@@ -4,8 +4,9 @@ from django.contrib.auth.models import User
 from django.db import models
 
 from .emails import send_rejected_mail, send_sold_mail
-from .utils import BaseEnumChoice
 from .tasks import work_with_auction
+from .utils import BaseEnumChoice
+from django.db import transaction
 
 class AuctionStatusChoice(BaseEnumChoice):
     PENDING = 0
@@ -81,15 +82,22 @@ class Auction(models.Model):
                 'updated',
             )
         )
-        send_sold_mail.delay(user)
+        transaction.on_commit(
+            send_sold_mail.delay(user)
+        )
 
     def make_offer(self, raise_price, user):
         if self.type == AuctionTypeChoice.ENGLISH.value and raise_price < self.step:
             raise ValueError
         self.current_price += raise_price
 
-
-        # previous_offer_user_mail = self.history.last().user.email if self.history.last() else None
+        previous_offer_user_mail = self.history.last().user.email
+        if previous_offer_user_mail:
+            transaction.on_commit(
+                send_rejected_mail.delay(
+                    previous_offer_user_mail
+                )
+            )
 
         self.create_history(user)
         self.save(
@@ -104,11 +112,6 @@ class Auction(models.Model):
                 [self.unique_id, user.id],
                 countdown=5
             )
-            pass
-        # if previous_offer_user_mail:
-        #     send_rejected_mail.delay(
-        #         previous_offer_user_mail
-        #     )
 
     def update_price(self):
         self.current_price -= self.step

@@ -1,6 +1,7 @@
+from django.db import transaction
 from rest_framework import pagination, generics
 from rest_framework.generics import get_object_or_404
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -16,9 +17,10 @@ class BuyItNowView(APIView):
             Auction,
             pk=unique_id
         )
-        auction.buy_item_now(
-            request.user
-        )
+        with transaction.atomic():
+            auction.buy_item_now(
+                request.user
+            )
         serializer = AuctionSerializer(auction)
         return Response(serializer.data)
 
