@@ -73,7 +73,7 @@ class Auction(models.Model):
     updated = models.DateTimeField(auto_now=True)
 
     def buy_item_now(self, user):
-        self.status = AuctionStatusChoice.CLOSED
+        self.status = AuctionStatusChoice.CLOSED.value
         self.current_price = self.buy_now_price
         self.save(
             update_fields=(
@@ -83,7 +83,7 @@ class Auction(models.Model):
             )
         )
         transaction.on_commit(
-            send_sold_mail.delay(user)
+            send_sold_mail.apply_async([user.email])
         )
 
     def make_offer(self, raise_price, user):
