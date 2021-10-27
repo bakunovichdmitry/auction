@@ -3,8 +3,8 @@ services:
   db:
     image: postgres
     restart: always # reload when db container is down
-#    volumes:
-#      - ./data/db:/var/lib/postgresql/data
+    #    volumes:
+    #      - ./data/db:/var/lib/postgresql/data
     environment:
       - POSTGRES_DB=auction
       - POSTGRES_USER=admin

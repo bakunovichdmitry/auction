@@ -22,3 +22,4 @@ def send_sold_mail(user_mail):
         settings.EMAIL_HOST_USER,
         [user_mail]
     )
+    return True

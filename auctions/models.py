@@ -8,6 +8,7 @@ from .tasks import work_with_auction
 from .utils import BaseEnumChoice
 from django.db import transaction
 
+
 class AuctionStatusChoice(BaseEnumChoice):
     PENDING = 0
     IN_PROGRESS = 1
@@ -72,7 +73,10 @@ class Auction(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
+    @transaction.atomic
     def buy_item_now(self, user):
+        if self.status == AuctionStatusChoice.CLOSED.value:
+            raise ValueError
         self.status = AuctionStatusChoice.CLOSED.value
         self.current_price = self.buy_now_price
         self.save(
@@ -83,18 +87,23 @@ class Auction(models.Model):
             )
         )
         transaction.on_commit(
-            send_sold_mail.apply_async([user.email])
+            lambda: send_sold_mail.apply_async([user.email, ])
         )
 
+    @transaction.atomic
     def make_offer(self, raise_price, user):
-        if self.type == AuctionTypeChoice.ENGLISH.value and raise_price < self.step:
+        if self.type == AuctionTypeChoice.ENGLISH.value and \
+                raise_price < self.step and \
+                self.status == AuctionStatusChoice.CLOSED.value:
             raise ValueError
+
+        # TODO: current_price = start_price on start??
         self.current_price += raise_price
 
         previous_offer_user_mail = self.history.last().user.email
         if previous_offer_user_mail:
             transaction.on_commit(
-                send_rejected_mail.delay(
+                lambda: send_rejected_mail.delay(
                     previous_offer_user_mail
                 )
             )
@@ -113,10 +122,11 @@ class Auction(models.Model):
                 countdown=5
             )
 
+    @transaction.atomic
     def update_price(self):
         self.current_price -= self.step
         if self.current_price < self.end_price:
-            self.status = AuctionStatusChoice.CLOSED
+            self.status = AuctionStatusChoice.CLOSED.value
             raise ValueError
         self.save(
             update_fields=(
@@ -125,8 +135,19 @@ class Auction(models.Model):
             )
         )
 
+    @transaction.atomic
+    def close(self):
+        if self.closing_date and self.status == AuctionStatusChoice.IN_PROGRESS.value:
+            self.status = AuctionStatusChoice.CLOSED.value
+            self.save(
+                update_fields=(
+                    'status',
+                    'updated',
+                )
+            )
+
     def create_history(self, user):
-        AuctionHistory.objects.create(
+        return AuctionHistory.objects.create(
             new_price=self.current_price,
             auction=self,
             user=user

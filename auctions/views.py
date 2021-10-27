@@ -1,5 +1,5 @@
-from django.db import transaction
 from rest_framework import pagination, generics
+from rest_framework import status
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -17,10 +17,9 @@ class BuyItNowView(APIView):
             Auction,
             pk=unique_id
         )
-        with transaction.atomic():
-            auction.buy_item_now(
-                request.user
-            )
+        auction.buy_item_now(
+            request.user
+        )
         serializer = AuctionSerializer(auction)
         return Response(serializer.data)
 
@@ -40,7 +39,8 @@ class MakeOfferView(APIView):
             )
         except ValueError:
             return Response(
-                {'detail': 'Enter a valid price'}
+                {'detail': 'Enter a valid price'},
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
 
