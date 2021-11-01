@@ -1,86 +1,83 @@
-from django.contrib.auth.models import User
-from django.db import transaction
 from django.utils import timezone
 
 from auction.celery import app
-from .emails import send_sold_mail
+from .emails import _send_reject_email, _send_sale_email
 
 
 @app.task
 def start_auctions():
     from .models import Auction, AuctionStatusChoice
 
-    auctions = Auction.objects.filter(
-        opening_date__lte=timezone.now(),
-        status=AuctionStatusChoice.PENDING.value
-    )
     auctions_unique_id = list(
         Auction.objects.filter(
             opening_date__lte=timezone.now(),
             status=AuctionStatusChoice.PENDING.value
-        ).values_list('unique_id', flat=True)
+        ).values_list('unique_id', 'closing_date')
+    )
+    auctions = Auction.objects.filter(
+        opening_date__lte=timezone.now(),
+        status=AuctionStatusChoice.PENDING.value
     )
     auctions.update(status=AuctionStatusChoice.IN_PROGRESS.value)
-    for unique_id in auctions_unique_id:
-        work_with_auction.delay(unique_id)
-
+    for unique_id, closing_date in auctions_unique_id:
+        process_auction.delay(unique_id)
+        delay_close_auction.apply_async(
+            [unique_id],
+            eta=closing_date
+        )
 
 @app.task
-def work_with_auction(auction_uuid, user_id=None):
+def process_auction(auction_uuid, user_id=None):
     from .models import Auction, AuctionStatusChoice, AuctionTypeChoice
     try:
-        auction = Auction.objects.get(pk=auction_uuid, status=AuctionStatusChoice.IN_PROGRESS.value)
+        auction = Auction.objects.get(
+            pk=auction_uuid,
+            status=AuctionStatusChoice.IN_PROGRESS.value
+        )
     except Auction.DoesNotExist:
         return
 
     if auction.type == AuctionTypeChoice.ENGLISH.value:
         work_with_english_auction(auction, user_id)
-        return
-    work_with_dutch_auction(auction)
+    elif auction.type == AuctionTypeChoice.DUTCH.value:
+        work_with_dutch_auction(auction)
 
 
 @app.task
 def work_with_dutch_auction(auction):
-    if (auction.current_price - auction.step) < auction.end_price or timezone.now() >= auction.closing_date:
+    if (auction.current_price - auction.step) < auction.end_price:
         auction.close()
         return
+
     auction.update_price()
-    work_with_auction.apply_async(
+    process_auction.apply_async(
         [auction.unique_id],
         countdown=auction.frequency
     )
 
 
 @app.task
-def work_with_english_auction(auction, user_id):
-    if not user_id:
-        # work_with_auction.apply_async(
-        #     [auction.unique_id],
-        #     eta=auction.closing_date
-        # )
-        close_auction.apply_async(
-            [auction.unique_id],
-            eta=auction.closing_date
-        )
+def work_with_english_auction(auction, user_id=None):
+    if not (auction.history.last() and user_id == auction.history.last().user_id):
         return
-    try:
-        user = User.objects.get(pk=user_id)
-        if auction.history.last() and user == auction.history.last().user:
-            # ???
-            # with transaction.atomic():
-            auction.close()
-            # transaction.on_commit(
-            #     lambda: send_sold_mail.delay(user.email)
-            # )
-    except User.DoesNotExist:
-        pass
+    auction.close()
 
 
 @app.task
-def close_auction(auction_uuid):
+def delay_close_auction(auction_uuid):
     from .models import Auction, AuctionStatusChoice
     try:
         auction = Auction.objects.get(pk=auction_uuid, status=AuctionStatusChoice.IN_PROGRESS.value)
         auction.close()
     except Auction.DoesNotExist:
         return
+
+
+@app.task
+def send_reject_email(user_email):
+    _send_reject_email(user_email)
+
+
+@app.task
+def send_sale_email(user_email):
+    _send_sale_email(user_email)

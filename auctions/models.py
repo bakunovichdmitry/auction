@@ -2,9 +2,9 @@ import uuid
 
 from django.contrib.auth.models import User
 from django.db import models
+from django.utils import timezone
 
-from .emails import send_rejected_mail, send_sold_mail
-from .tasks import work_with_auction
+from .tasks import process_auction, send_reject_email, send_sale_email
 from .utils import BaseEnumChoice
 from django.db import transaction
 
@@ -77,7 +77,9 @@ class Auction(models.Model):
     def buy_item_now(self, user):
         if self.status == AuctionStatusChoice.CLOSED.value:
             raise ValueError
-        self.status = AuctionStatusChoice.CLOSED.value
+
+        self.close(user)
+
         self.current_price = self.buy_now_price
         self.save(
             update_fields=(
@@ -86,48 +88,50 @@ class Auction(models.Model):
                 'updated',
             )
         )
-        transaction.on_commit(
-            lambda: send_sold_mail.apply_async([user.email, ])
-        )
 
     @transaction.atomic
     def make_offer(self, raise_price, user):
-        if self.type == AuctionTypeChoice.ENGLISH.value and \
+        if self.type != AuctionTypeChoice.ENGLISH.value and \
                 raise_price < self.step and \
                 self.status == AuctionStatusChoice.CLOSED.value:
             raise ValueError
 
-        # TODO: current_price = start_price on start??
+        from datetime import timedelta
+        self.closing_date = min(self.closing_date, timezone.now() + timedelta(seconds=5))
         self.current_price += raise_price
 
-        previous_offer_user_mail = self.history.last().user.email
-        if previous_offer_user_mail:
-            transaction.on_commit(
-                lambda: send_rejected_mail.delay(
-                    previous_offer_user_mail
-                )
-            )
+        # previous_offer_user_mail = self.history.last().user.email
+        # if previous_offer_user_mail:
+        #     transaction.on_commit(
+        #         lambda: send_rejected_mail.delay(
+        #             previous_offer_user_mail
+        #         )
+        #     )
 
         self.create_history(user)
         self.save(
             update_fields=(
+                'closing_date',
                 'current_price',
                 'updated',
             )
         )
 
-        if self.type == AuctionTypeChoice.ENGLISH.value:
-            work_with_auction.apply_async(
-                [self.unique_id, user.id],
-                countdown=5
+        transaction.on_commit(
+            process_auction.apply_async(
+                [self.unique_id],
+                eta=self.closing_date
             )
+        )
+
 
     @transaction.atomic
+    #bid_step_decline
     def update_price(self):
         self.current_price -= self.step
         if self.current_price < self.end_price:
-            self.status = AuctionStatusChoice.CLOSED.value
             raise ValueError
+        
         self.save(
             update_fields=(
                 'current_price',
@@ -136,9 +140,14 @@ class Auction(models.Model):
         )
 
     @transaction.atomic
-    def close(self):
-        if self.closing_date and self.status == AuctionStatusChoice.IN_PROGRESS.value:
+    def close(self, user=None, send_mail=False):
+        if self.status == AuctionStatusChoice.IN_PROGRESS.value:
             self.status = AuctionStatusChoice.CLOSED.value
+            if send_mail and user:
+                transaction.on_commit(
+                    lambda: send_sale_email(user.email)
+                )
+
             self.save(
                 update_fields=(
                     'status',
