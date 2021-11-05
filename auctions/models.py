@@ -97,7 +97,10 @@ class Auction(models.Model):
             raise ValueError
 
         from datetime import timedelta
-        self.closing_date = min(self.closing_date, timezone.now() + timedelta(seconds=5))
+        self.closing_date = max(
+            self.closing_date,
+            timezone.now() + timedelta(minutes=10)
+        )
         self.current_price += raise_price
 
         # previous_offer_user_mail = self.history.last().user.email
@@ -109,13 +112,6 @@ class Auction(models.Model):
         #     )
 
         self.create_history(user)
-        self.save(
-            update_fields=(
-                'closing_date',
-                'current_price',
-                'updated',
-            )
-        )
 
         transaction.on_commit(
             process_auction.apply_async(
@@ -124,14 +120,25 @@ class Auction(models.Model):
             )
         )
 
+        self.save(
+            update_fields=(
+                'closing_date',
+                'current_price',
+                'updated',
+            )
+        )
+
+
+
 
     @transaction.atomic
-    #bid_step_decline
-    def update_price(self):
+    def update_dutch_price(self):
+        if self.type:
+            raise ValueError
         self.current_price -= self.step
         if self.current_price < self.end_price:
             raise ValueError
-        
+
         self.save(
             update_fields=(
                 'current_price',

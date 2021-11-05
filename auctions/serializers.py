@@ -13,3 +13,10 @@ class AuctionHistorySerializer(serializers.ModelSerializer):
     class Meta:
         model = AuctionHistory
         fields = '__all__'
+
+
+class MakeOfferSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Auction
+        fields = '__all__'

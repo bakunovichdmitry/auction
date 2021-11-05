@@ -1,3 +1,4 @@
+from django.shortcuts import render
 from rest_framework import pagination, generics
 from rest_framework import status
 from rest_framework.generics import get_object_or_404
@@ -8,6 +9,14 @@ from rest_framework.views import APIView
 from .models import Auction, AuctionHistory
 from .serializers import AuctionSerializer, AuctionHistorySerializer
 
+
+def index(request):
+    return render(request, 'test/index.html')
+
+def room(request, room_name):
+    return render(request, 'test/room.html', {
+        'room_name': room_name
+    })
 
 class BuyItNowView(APIView):
     permission_classes = (IsAuthenticated,)

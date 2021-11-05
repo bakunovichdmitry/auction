@@ -33,23 +33,23 @@ def process_auction(auction_uuid, user_id=None):
         auction = Auction.objects.get(
             pk=auction_uuid,
             status=AuctionStatusChoice.IN_PROGRESS.value
-        )
+        ) # select_for_update()
     except Auction.DoesNotExist:
         return
 
     if auction.type == AuctionTypeChoice.ENGLISH.value:
-        work_with_english_auction(auction, user_id)
+        process_english_auction(auction, user_id)
     elif auction.type == AuctionTypeChoice.DUTCH.value:
-        work_with_dutch_auction(auction)
+        process_dutch_auction(auction)
 
 
 @app.task
-def work_with_dutch_auction(auction):
+def process_dutch_auction(auction):
     if (auction.current_price - auction.step) < auction.end_price:
         auction.close()
         return
 
-    auction.update_price()
+    auction.update_dutch_price()
     process_auction.apply_async(
         [auction.unique_id],
         countdown=auction.frequency
@@ -57,8 +57,8 @@ def work_with_dutch_auction(auction):
 
 
 @app.task
-def work_with_english_auction(auction, user_id=None):
-    if not (auction.history.last() and user_id == auction.history.last().user_id):
+def process_english_auction(auction, user_id=None):
+    if not (auction.history.last() and user_id != auction.history.last().user_id):
         return
     auction.close()
 

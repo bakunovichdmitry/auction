@@ -13,7 +13,8 @@ from .models import Lot
 class LotListView(generics.ListAPIView):
     queryset = Lot.objects.select_related('auction', 'item').all()
     serializer_class = LotSerializer
-    pagination_class = pagination.LimitOffsetPagination
+    pagination_class = pagination.PageNumberPagination
+    page_size = 2
 
     filter_backends = (
         filters.OrderingFilter,

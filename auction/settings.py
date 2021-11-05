@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'django_filters',
     'corsheaders',
+    'channels',
 ]
 
 MIDDLEWARE = [
@@ -63,7 +64,16 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'auction.wsgi.application'
+ASGI_APPLICATION = "auction.asgi.application"
 
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('redis', 6379)],
+        },
+    },
+}
 
 # Password validation
 
