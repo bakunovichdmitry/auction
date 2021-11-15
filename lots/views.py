@@ -1,6 +1,5 @@
 from rest_framework import generics
 from rest_framework.generics import get_object_or_404
-from rest_framework.permissions import AllowAny
 from rest_framework import filters
 from rest_framework import pagination
 from django_filters.rest_framework import DjangoFilterBackend
@@ -14,8 +13,8 @@ from .models import Lot
 class LotListView(generics.ListAPIView):
     queryset = Lot.objects.select_related('auction', 'item').all()
     serializer_class = LotSerializer
-    pagination_class = pagination.LimitOffsetPagination
-    permission_classes = (AllowAny,)
+    pagination_class = pagination.PageNumberPagination
+    page_size = 2
 
     filter_backends = (
         filters.OrderingFilter,
@@ -39,4 +38,3 @@ class LotDetailView(APIView):
         )
         serializer = LotSerializer(lot)
         return Response(serializer.data)
-

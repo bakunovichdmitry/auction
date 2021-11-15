@@ -15,3 +15,4 @@ class LotInline(admin.StackedInline):
 @admin.register(Auction)
 class AuctionAdmin(admin.ModelAdmin):
     inlines = [LotInline]
+    pass
