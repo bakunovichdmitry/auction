@@ -1,21 +1,16 @@
-from rest_framework import generics
-from rest_framework.generics import get_object_or_404
-from rest_framework import filters
-from rest_framework import pagination
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.response import Response
-from rest_framework.views import APIView
+from rest_framework import filters
+from rest_framework import generics
 
-from .serializers import LotSerializer
 from .models import Lot
+from .pagination import LotPagination
+from .serializers import LotSerializer
 
 
 class LotListView(generics.ListAPIView):
-    queryset = Lot.objects.select_related('auction', 'item').all()
+    queryset = Lot.objects.select_related('auction', 'item')
     serializer_class = LotSerializer
-    pagination_class = pagination.PageNumberPagination
-    page_size = 2
-
+    pagination_class = LotPagination
     filter_backends = (
         filters.OrderingFilter,
         DjangoFilterBackend
@@ -30,11 +25,7 @@ class LotListView(generics.ListAPIView):
     )
 
 
-class LotDetailView(APIView):
-    def get(self, request, unique_id):
-        lot = get_object_or_404(
-            Lot.objects.select_related('auction', 'item'),
-            pk=unique_id
-        )
-        serializer = LotSerializer(lot)
-        return Response(serializer.data)
+class LotDetailView(generics.RetrieveAPIView):
+    lookup_field = 'unique_id'
+    queryset = Lot.objects.all()
+    serializer_class = LotSerializer

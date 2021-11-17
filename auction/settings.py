@@ -1,6 +1,8 @@
 import os
 from pathlib import Path
 
+from django.utils import timezone
+
 from .setting_local import *
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -129,13 +131,10 @@ CELERY_ENABLE_UTC = True
 
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
-# CORS_ORIGIN_WHITELIST = [
-#     'http://localhost:3000',
-# ] # If this is used, then not need to use `CORS_ORIGIN_ALLOW_ALL = True`
-# CORS_ORIGIN_REGEX_WHITELIST = [
-#     'http://localhost:3000',
-# ]
 
+# ENGLISH AUCTION CONSTANTS
+
+ENGLISH_AUCTION_CLOSE_TIMEDELTA = timezone.timedelta(seconds=20)
 
 # LOGGING = {
 #     'disable_existing_loggers': False,

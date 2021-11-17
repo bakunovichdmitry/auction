@@ -7,16 +7,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import Auction, AuctionHistory
-from .serializers import AuctionSerializer, AuctionHistorySerializer
+from .serializers import AuctionSerializer, AuctionHistorySerializer, MakeOfferSerializer
 
-
-def index(request):
-    return render(request, 'test/index.html')
-
-def room(request, room_name):
-    return render(request, 'test/room.html', {
-        'room_name': room_name
-    })
 
 class BuyItNowView(APIView):
     permission_classes = (IsAuthenticated,)
@@ -36,21 +28,24 @@ class BuyItNowView(APIView):
 class MakeOfferView(APIView):
     permission_classes = (IsAuthenticated,)
 
-    def post(self, request, unique_id, raise_price):
+    def post(self, request, unique_id):
         auction = get_object_or_404(
             Auction,
             pk=unique_id
         )
-        try:
-            auction.make_offer(raise_price, request.user)
-            return Response(
-                {'detail': 'Your offer has been accepted'}
+        serializer = MakeOfferSerializer(
+            data=request.data,
+            context={
+                'min_rate': auction.step
+            }
+        )
+        if serializer.is_valid():
+            auction.make_offer(
+                raise_price=request.data.get('raise_price'),
+                user=request.user
             )
-        except ValueError:
-            return Response(
-                {'detail': 'Enter a valid price'},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+            return Response(serializer.data)
+        return Response(serializer.errors)
 
 
 class AuctionHistoryView(generics.ListAPIView):
