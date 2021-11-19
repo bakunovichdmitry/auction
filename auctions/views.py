@@ -6,7 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import Auction, AuctionHistory
+from .models import Auction, AuctionHistory, AuctionStatusChoice
 from .serializers import AuctionSerializer, AuctionHistorySerializer, MakeOfferSerializer
 
 
@@ -21,8 +21,7 @@ class BuyItNowView(APIView):
         auction.buy_item_now(
             request.user
         )
-        serializer = AuctionSerializer(auction)
-        return Response(serializer.data)
+        return Response(status=status.HTTP_200_OK)
 
 
 class MakeOfferView(APIView):
@@ -31,7 +30,8 @@ class MakeOfferView(APIView):
     def post(self, request, unique_id):
         auction = get_object_or_404(
             Auction,
-            pk=unique_id
+            pk=unique_id,
+            status=AuctionStatusChoice.IN_PROGRESS.value
         )
         serializer = MakeOfferSerializer(
             data=request.data,
@@ -41,11 +41,14 @@ class MakeOfferView(APIView):
         )
         if serializer.is_valid():
             auction.make_offer(
-                raise_price=request.data.get('raise_price'),
+                raise_price=serializer.validated_data.get('raise_price'),
                 user=request.user
             )
             return Response(serializer.data)
-        return Response(serializer.errors)
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
 
 class AuctionHistoryView(generics.ListAPIView):
