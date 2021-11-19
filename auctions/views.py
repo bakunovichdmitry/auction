@@ -20,6 +20,7 @@ class BuyItNowView(APIView):
         auction.buy_item_now(
             request.user
         )
+        auction.realtime_update()
         return Response(status=status.HTTP_200_OK)
 
 
@@ -43,6 +44,7 @@ class MakeOfferView(APIView):
                 raise_price=serializer.validated_data.get('raise_price'),
                 user=request.user
             )
+            auction.realtime_update()
             return Response(serializer.data)
         return Response(
             serializer.errors,

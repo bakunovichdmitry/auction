@@ -4,7 +4,7 @@ services:
     image: postgres
     restart: always # reload when db container is down
     volumes:
-      - ./data/db:/var/lib/postgresql/data
+      - .:/app/data/db
     environment:
       - POSTGRES_DB=auction
       - POSTGRES_USER=admin
@@ -20,11 +20,22 @@ services:
       - "8000:8000"
     depends_on:
       - db
+  beat:
+    restart: always
+    build:
+      context: .
+    command: celery -A auction beat -l info --max-interval 600
+    volumes:
+      - .:/app
+    depends_on:
+      - db
+      - redis
+      - web
   celery:
     restart: always
     build:
       context: .
-    command: celery -A auction worker -B -l info
+    command: celery -A auction worker -l info
     volumes:
       - .:/app
     depends_on:

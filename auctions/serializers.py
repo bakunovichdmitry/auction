@@ -26,9 +26,3 @@ class MakeOfferSerializer(serializers.Serializer):
         if raise_price < self.context.get('min_rate'):
             raise ValidationError('less then minimal rate')
         return raise_price
-
-    def create(self, validated_data):
-        pass
-
-    def update(self, instance, validated_data):
-        pass

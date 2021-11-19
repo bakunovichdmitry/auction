@@ -82,10 +82,6 @@ class Auction(models.Model):
 
         self.current_price = self.buy_now_price
 
-        transaction.on_commit(
-            lambda: self.realtime_update()
-        )
-
         self.save(
             update_fields=(
                 'status',
@@ -106,19 +102,15 @@ class Auction(models.Model):
         )
         self.current_price += raise_price
 
-        previous_offer_user_mail = self.history.last().user.email
-        if previous_offer_user_mail:
+        previous_offer = self.history.last()
+        if previous_offer:
             transaction.on_commit(
                 lambda: send_reject_email.delay(
-                    previous_offer_user_mail
+                    previous_offer.user.email
                 )
             )
 
         self.create_history(user)
-
-        transaction.on_commit(
-            lambda: self.realtime_update()
-        )
 
         self.save(
             update_fields=(
@@ -154,10 +146,6 @@ class Auction(models.Model):
             transaction.on_commit(
                 lambda: send_sale_email(user.email)
             )
-
-        transaction.on_commit(
-            lambda: self.realtime_update()
-        )
 
         self.save(
             update_fields=(

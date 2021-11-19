@@ -44,9 +44,12 @@ def process_auction(auction_uuid):
 def process_dutch_auction(auction):
     if (auction.current_price - auction.step) < auction.end_price:
         auction.close()
+        auction.realtime_update()
         return
 
     auction.update_dutch_price()
+    auction.realtime_update()
+
     process_auction.apply_async(
         [auction.unique_id],
         countdown=auction.frequency
@@ -57,6 +60,7 @@ def process_english_auction(auction):
     now = timezone.now()
     if now - settings.ENGLISH_AUCTION_CLOSE_TIMEDELTA <= auction.closing_date <= now + settings.ENGLISH_AUCTION_CLOSE_TIMEDELTA:
         auction.close()
+        auction.realtime_update()
         return
 
     process_auction.apply_async(

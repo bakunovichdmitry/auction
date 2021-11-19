@@ -9,10 +9,8 @@ class AuctionConsumer(JsonWebsocketConsumer):
         self.group_name = None
 
     def connect(self):
-        auction_uuid = self.scope['url_route']['kwargs']['unique_id']
+        auction_uuid = self.scope['url_route']['kwargs']['id']
         self.group_name = 'auction_%s' % auction_uuid
-        print(self.group_name)
-
         async_to_sync(self.channel_layer.group_add)(
             self.group_name,
             self.channel_name
