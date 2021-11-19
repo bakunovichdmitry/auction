@@ -7,7 +7,7 @@ from django.db import models
 from django.db import transaction
 from django.utils import timezone
 
-from .tasks import process_auction, send_sale_email
+from .tasks import send_reject_email, send_sale_email
 from .utils import BaseEnumChoice
 
 
@@ -20,7 +20,6 @@ class AuctionStatusChoice(BaseEnumChoice):
 class AuctionTypeChoice(BaseEnumChoice):
     DUTCH = 0
     ENGLISH = 1
-
 
 
 class Auction(models.Model):
@@ -107,13 +106,13 @@ class Auction(models.Model):
         )
         self.current_price += raise_price
 
-        # previous_offer_user_mail = self.history.last().user.email
-        # if previous_offer_user_mail:
-        #     transaction.on_commit(
-        #         lambda: send_rejected_mail.delay(
-        #             previous_offer_user_mail
-        #         )
-        #     )
+        previous_offer_user_mail = self.history.last().user.email
+        if previous_offer_user_mail:
+            transaction.on_commit(
+                lambda: send_reject_email.delay(
+                    previous_offer_user_mail
+                )
+            )
 
         self.create_history(user)
 

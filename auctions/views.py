@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from rest_framework import pagination, generics
 from rest_framework import status
 from rest_framework.generics import get_object_or_404
@@ -7,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import Auction, AuctionHistory, AuctionStatusChoice
-from .serializers import AuctionSerializer, AuctionHistorySerializer, MakeOfferSerializer
+from .serializers import AuctionHistorySerializer, MakeOfferSerializer
 
 
 class BuyItNowView(APIView):
