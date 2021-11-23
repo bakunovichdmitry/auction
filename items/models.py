@@ -7,5 +7,6 @@ class Item(models.Model):
     title = models.CharField(max_length=128)
     description = models.TextField()
 
+    @property
     def short_description(self):
         return truncatechars(self.description, 35)

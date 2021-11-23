@@ -1,6 +1,8 @@
 import os
 from pathlib import Path
 
+from django.utils import timezone
+
 from .setting_local import *
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -104,7 +106,7 @@ REST_FRAMEWORK = {
 # Internationalization
 
 LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Minsk'
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True
@@ -122,20 +124,16 @@ MEDIA_URL = '/media/'
 
 CELERY_BROKER_URL = "redis://redis:6379"
 CELERY_RESULT_BACKEND = "redis://redis:6379"
-CELERY_TIMEZONE = 'UTC'
-CELERY_ENABLE_UTC = True
+CELERY_TIMEZONE= 'Europe/Minsk'
 
 # CORS
 
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
-# CORS_ORIGIN_WHITELIST = [
-#     'http://localhost:3000',
-# ] # If this is used, then not need to use `CORS_ORIGIN_ALLOW_ALL = True`
-# CORS_ORIGIN_REGEX_WHITELIST = [
-#     'http://localhost:3000',
-# ]
 
+# ENGLISH AUCTION CONSTANTS
+
+ENGLISH_AUCTION_CLOSE_TIMEDELTA = timezone.timedelta(seconds=20)
 
 # LOGGING = {
 #     'disable_existing_loggers': False,

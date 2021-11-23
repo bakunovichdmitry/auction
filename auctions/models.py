@@ -1,12 +1,14 @@
 import uuid
 
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
 from django.contrib.auth.models import User
 from django.db import models
+from django.db import transaction
 from django.utils import timezone
 
-from .tasks import process_auction, send_reject_email, send_sale_email
+from .tasks import send_reject_email, send_sale_email
 from .utils import BaseEnumChoice
-from django.db import transaction
 
 
 class AuctionStatusChoice(BaseEnumChoice):
@@ -21,6 +23,8 @@ class AuctionTypeChoice(BaseEnumChoice):
 
 
 class Auction(models.Model):
+    DELAY_AUCTION_TIME = timezone.timedelta(minutes=10)
+
     unique_id = models.UUIDField(
         primary_key=True,
         default=uuid.uuid4,
@@ -34,8 +38,6 @@ class Auction(models.Model):
         max_digits=10,
         decimal_places=2,
         blank=True,
-        null=True,
-        default=None,
     )
     step = models.DecimalField(
         max_digits=10,
@@ -81,6 +83,7 @@ class Auction(models.Model):
         self.close(user)
 
         self.current_price = self.buy_now_price
+
         self.save(
             update_fields=(
                 'status',
@@ -91,34 +94,24 @@ class Auction(models.Model):
 
     @transaction.atomic
     def make_offer(self, raise_price, user):
-        if self.type != AuctionTypeChoice.ENGLISH.value and \
-                raise_price < self.step and \
-                self.status == AuctionStatusChoice.CLOSED.value:
+        if self.type != AuctionTypeChoice.ENGLISH.value and self.status == AuctionStatusChoice.CLOSED.value:
             raise ValueError
 
-        from datetime import timedelta
         self.closing_date = max(
             self.closing_date,
-            timezone.now() + timedelta(minutes=10)
+            timezone.now() + self.DELAY_AUCTION_TIME
         )
         self.current_price += raise_price
 
-        # previous_offer_user_mail = self.history.last().user.email
-        # if previous_offer_user_mail:
-        #     transaction.on_commit(
-        #         lambda: send_rejected_mail.delay(
-        #             previous_offer_user_mail
-        #         )
-        #     )
+        previous_offer = self.history.last()
+        if previous_offer:
+            transaction.on_commit(
+                lambda: send_reject_email.delay(
+                    previous_offer.user.email
+                )
+            )
 
         self.create_history(user)
-
-        transaction.on_commit(
-            process_auction.apply_async(
-                [self.unique_id],
-                eta=self.closing_date
-            )
-        )
 
         self.save(
             update_fields=(
@@ -127,9 +120,6 @@ class Auction(models.Model):
                 'updated',
             )
         )
-
-
-
 
     @transaction.atomic
     def update_dutch_price(self):
@@ -148,19 +138,32 @@ class Auction(models.Model):
 
     @transaction.atomic
     def close(self, user=None, send_mail=False):
-        if self.status == AuctionStatusChoice.IN_PROGRESS.value:
-            self.status = AuctionStatusChoice.CLOSED.value
-            if send_mail and user:
-                transaction.on_commit(
-                    lambda: send_sale_email(user.email)
-                )
-
-            self.save(
-                update_fields=(
-                    'status',
-                    'updated',
-                )
+        self.status = AuctionStatusChoice.CLOSED.value
+        if send_mail and user:
+            transaction.on_commit(
+                lambda: send_sale_email(user.email)
             )
+
+        self.save(
+            update_fields=(
+                'status',
+                'updated',
+            )
+        )
+
+    def realtime_update(self):
+        from .serializers import AuctionSerializer
+
+        channel_layer = get_channel_layer()
+        group_name = 'auction_%s' % self.unique_id
+        serializer = AuctionSerializer(self)
+        async_to_sync(channel_layer.group_send)(
+            group_name,
+            {
+                'type': 'send_changed_data',
+                'data': serializer.data
+            }
+        )
 
     def create_history(self, user):
         return AuctionHistory.objects.create(
