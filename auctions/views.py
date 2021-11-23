@@ -39,17 +39,14 @@ class MakeOfferView(APIView):
                 'min_rate': auction.step
             }
         )
-        if serializer.is_valid():
-            auction.make_offer(
-                raise_price=serializer.validated_data.get('raise_price'),
-                user=request.user
-            )
-            auction.realtime_update()
-            return Response(serializer.data)
-        return Response(
-            serializer.errors,
-            status=status.HTTP_400_BAD_REQUEST,
+        serializer.is_valid(raise_exception=True)
+        auction.make_offer(
+            raise_price=serializer.validated_data['raise_price'],
+            user=request.user
         )
+        auction.realtime_update()
+        return Response(status=status.HTTP_200_OK)
+
 
 
 class AuctionHistoryView(generics.ListAPIView):

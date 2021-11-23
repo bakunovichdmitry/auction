@@ -23,6 +23,8 @@ class AuctionTypeChoice(BaseEnumChoice):
 
 
 class Auction(models.Model):
+    DELAY_AUCTION_TIME = timezone.timedelta(minutes=10)
+
     unique_id = models.UUIDField(
         primary_key=True,
         default=uuid.uuid4,
@@ -95,10 +97,9 @@ class Auction(models.Model):
         if self.type != AuctionTypeChoice.ENGLISH.value and self.status == AuctionStatusChoice.CLOSED.value:
             raise ValueError
 
-        from datetime import timedelta
         self.closing_date = max(
             self.closing_date,
-            timezone.now() + timedelta(minutes=10)
+            timezone.now() + self.DELAY_AUCTION_TIME
         )
         self.current_price += raise_price
 
@@ -127,10 +128,6 @@ class Auction(models.Model):
         self.current_price -= self.step
         if self.current_price < self.end_price:
             raise ValueError
-
-        transaction.on_commit(
-            lambda: self.realtime_update()
-        )
 
         self.save(
             update_fields=(
