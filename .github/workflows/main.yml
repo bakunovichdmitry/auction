@@ -14,5 +14,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Run a one-line script
-        run: echo Hello, world!
+      - name: Build
+        run: docker-compose up -d --build
+      - name: Migrate
+        run: docker-compose run --rm --entrypoint='./manage.py migrate' web  
+      - name: curl
+        run: curl http://localhost:8000/lots/
