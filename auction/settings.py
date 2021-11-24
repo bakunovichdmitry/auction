@@ -3,12 +3,39 @@ from pathlib import Path
 
 from django.utils import timezone
 
-from .setting_local import *
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
 
 # Application definition
+
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = '@w9*-uh-$h=6ynfr*)ccidcm(adt%*rl!!h*ggh-bb2uwa)cy-'
+
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = True
+
+ALLOWED_HOSTS = ['localhost', '0.0.0.0']
+
+# DATABASE
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'auction',
+        'USER': 'admin',
+        'PASSWORD': 'admin',
+        'HOST': 'db',
+        'PORT': 5432,
+    }
+}
+
+# EMAIL
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = 'auctiondjango@gmail.com'
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+
 
 INSTALLED_APPS = [
     # Local Apps
