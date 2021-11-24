@@ -20,3 +20,5 @@ jobs:
         run: docker-compose run --rm --entrypoint='./manage.py migrate' web  
       - name: curl
         run: curl http://localhost:8000/lots/
+      - name: Tests
+        run: docker-compose run web pytest auctions/ -rP
