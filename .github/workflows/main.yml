@@ -8,17 +8,20 @@ on:
 
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  tests:
+    name: "Python ${{ matrix.python-version }}"
+    runs-on: "ubuntu-latest"
+
+    strategy:
+      matrix:
+        python-version: ["3.8.4"]
 
     steps:
-      - uses: actions/checkout@v2
-
-      - name: Build
-        run: docker-compose up -d --build
-      - name: Migrate
-        run: docker-compose run --rm --entrypoint='./manage.py migrate' web  
-      - name: curl
-        run: curl http://localhost:8000/lots/
-      - name: Tests
-        run: docker-compose run web pytest auctions/ -rP
+    - name: Build
+      run: docker-compose up -d --build
+    - name: Migrate
+      run: docker-compose run --rm --entrypoint='./manage.py migrate' web  
+    - name: curl
+      run: curl http://localhost:8000/lots/
+    - name: Tests
+      run: docker-compose run web pytest auctions/ -rP
