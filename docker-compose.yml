@@ -15,6 +15,7 @@ services:
     build: .
     environment:
       - SECRET_KEY=${SECRET_KEY}
+      - EMAIL_HOST_PASSWORD=${EMAIL_HOST_PASSWORD}
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - .:/app
