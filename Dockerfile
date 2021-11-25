@@ -15,4 +15,4 @@ RUN poetry config virtualenvs.create false && poetry install --no-interaction --
 # Creating folders, and files for a project:
 COPY . /app
 
-ENTRYPOINT ginicorn auction.wsgi --bind 0.0.0.0:8000
+ENTRYPOINT gunicorn auction.wsgi --bind 0.0.0.0:8000
