@@ -3,13 +3,17 @@ from pathlib import Path
 
 from django.utils import timezone
 
-# from .setting_local import *
+SECRET_KEY = '@w9*-uh-$h=6ynfr*)ccidcm(adt%*rl!!h*ggh-bb2uwa)cy-'
+
+EMAIL_HOST_PASSWORD = 'AuctionDjango123'
+
+DEBUG = True
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
 
 # Application definition
-SECRET_KEY = os.getenv('SECRET_KEY')
+# SECRET_KEY = os.getenv('SECRET_KEY')
 
 ALLOWED_HOSTS = ['*']
 
@@ -29,7 +33,7 @@ DATABASES = {
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_HOST_USER = 'auctiondjango@gmail.com'
-EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+#EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 
