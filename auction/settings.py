@@ -10,6 +10,25 @@ BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
 
 # Application definition
 
+SECRET_KEY = '@w9*-uh-$h=6ynfr*)ccidcm(adt%*rl!!h*ggh-bb2uwa)cy-'
+
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = True
+
+ALLOWED_HOSTS = ['localhost', '0.0.0.0']
+
+# DATABASE
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'auction',
+        'USER': 'admin',
+        'PASSWORD': 'admin',
+        'HOST': 'db',
+        'PORT': 5432,
+    }
+}
+
 INSTALLED_APPS = [
     # Local Apps
     'items.apps.ItemsConfig',
