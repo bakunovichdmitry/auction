@@ -1,25 +1,26 @@
 name: Auction CI/CD
-
+env:
+  SECRET_KEY: ${{ secrets.SECRET_KEY }}
+  EMAIL_HOST_PASSWORD: ${{ secrets.EMAIL_HOST_PASSWORD }}
 
 on:
   push:
-    branches: "*"
+    branches:
+      - "*"
   pull_request:
     branches: [ master ]
-  workflow_dispatch:
 
 
 jobs:
-  tests:
+  CI:
     runs-on: ubuntu-latest
-
     steps:
-    - uses: "actions/checkout@v2"
-    - name: Build docker compose
-      run: docker-compose up -d --build
-    - name: Migrate database
-      run: docker-compose run --rm --entrypoint='./manage.py migrate' web
-    - name: Curl test
-      run: curl http://localhost:8000/lots/
-    - name: Pytest
-      run: docker-compose run web pytest auctions/ -rP
+      - uses: "actions/checkout@v2"
+      - name: Build docker-compose
+        run: docker-compose up -d --build
+      - name: Migrate database
+        run: docker-compose run --rm --entrypoint='./manage.py migrate' web
+      - name: Start curl test
+        run: curl http://localhost:8000/lots/
+      - name: Start pytest
+        run: docker-compose run web pytest -rP
