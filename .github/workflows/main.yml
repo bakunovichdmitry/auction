@@ -12,19 +12,15 @@ on:
 
 
 jobs:
-  build:
+  CI:
     runs-on: ubuntu-latest
     steps:
       - uses: "actions/checkout@v2"
-      - name: Build docker compose
+      - name: Build docker-compose
         run: docker-compose up -d --build
       - name: Migrate database
         run: docker-compose run --rm --entrypoint='./manage.py migrate' web
-  tests:
-    runs-on: ubuntu-latest
-    needs: [build]
-    steps:
-      - name: Curl test
+      - name: Start curl test
         run: curl http://localhost:8000/lots/
-      - name: Pytest
+      - name: Start pytest
         run: docker-compose run web pytest -rP
