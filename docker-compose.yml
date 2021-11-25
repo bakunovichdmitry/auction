@@ -13,6 +13,8 @@ services:
     image: redis
   web:
     build: .
+    environment:
+      - SECRET_KEY=${SECRET_KEY}
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - .:/app
