@@ -3,7 +3,7 @@ from pathlib import Path
 
 from django.utils import timezone
 
-from .setting_local import *
+# from .setting_local import *
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
