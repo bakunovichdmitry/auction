@@ -21,6 +21,7 @@ jobs:
       - name: Migrate database
         run: docker-compose run --rm --entrypoint='./manage.py migrate' web
   tests:
+    runs-on: ubuntu-latest
     needs: [build]
     steps:
       - name: Curl test
