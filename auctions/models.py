@@ -172,6 +172,11 @@ class Auction(models.Model):
             user=user
         )
 
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        if self.current_price == None:
+            self.current_price = self.start_price
+        super(Auction, self).save()
+
 
 class AuctionHistory(models.Model):
     new_price = models.DecimalField(

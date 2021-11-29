@@ -1,21 +1,30 @@
 import os
 from pathlib import Path
 
+import cloudinary
+import cloudinary.api
+import cloudinary.uploader
+import dj_database_url
 from django.utils import timezone
 
-SECRET_KEY = '@w9*-uh-$h=6ynfr*)ccidcm(adt%*rl!!h*ggh-bb2uwa)cy-'
+from .setting_local import *
 
-EMAIL_HOST_PASSWORD = 'AuctionDjango123'
-
+# SECRET_KEY = os.environ.get('SECRET_KEY')
 DEBUG = True
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
 
-# Application definition
-# SECRET_KEY = os.getenv('SECRET_KEY')
-
 ALLOWED_HOSTS = ['*']
+
+# MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+# MEDIA_URL = '/media/'
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': "hinwj35ai",
+    'API_KEY': "834215971652556",
+    'API_SECRET': "OKthl0guiMc6ko_9vc-XuMA9LLQ"
+}
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 # DATABASE
 DATABASES = {
@@ -29,14 +38,17 @@ DATABASES = {
     }
 }
 
+DATABASE_URL = os.environ.get('DATABASE_URL')
+db_from_env = dj_database_url.config(default=DATABASE_URL, conn_max_age=500, ssl_require=True)
+DATABASES['default'].update(db_from_env)
+
 # EMAIL
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_HOST_USER = 'auctiondjango@gmail.com'
-#EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-
 
 INSTALLED_APPS = [
     # Local Apps
@@ -59,6 +71,8 @@ INSTALLED_APPS = [
     'django_filters',
     'corsheaders',
     'channels',
+    'cloudinary',
+    'cloudinary_storage',
 ]
 
 MIDDLEWARE = [
@@ -100,7 +114,7 @@ CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            "hosts": [('redis', 6379)],
+            "hosts": [os.environ.get('HEROKU_REDIS_YELLOW_URL', 'redis://redis:6379')],
         },
     },
 }
@@ -142,17 +156,13 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 
 STATIC_URL = '/static/'
-
-# Media files
-
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-MEDIA_URL = '/media/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Celery
 
-CELERY_BROKER_URL = "redis://redis:6379"
-CELERY_RESULT_BACKEND = "redis://redis:6379"
-CELERY_TIMEZONE= 'Europe/Minsk'
+CELERY_BROKER_URL = os.environ.get('HEROKU_REDIS_YELLOW_URL', 'redis://redis:6379')
+CELERY_RESULT_BACKEND = os.environ.get('HEROKU_REDIS_YELLOW_URL', 'redis://redis:6379')
+CELERY_TIMEZONE = 'Europe/Minsk'
 
 # CORS
 

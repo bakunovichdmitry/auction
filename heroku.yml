@@ -1,3 +1,13 @@
 build:
   docker:
     web: Dockerfile
+    worker: Dockerfile
+run:
+  web:
+    command:
+      - daphne auction.asgi:application --port $PORT --bind 0.0.0.0 -v2
+    image: web
+  worker:
+    command:
+      - celery -A auction.celery worker -B -l info
+    image: worker
