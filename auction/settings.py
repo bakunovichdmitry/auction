@@ -7,9 +7,9 @@ import cloudinary.uploader
 import dj_database_url
 from django.utils import timezone
 
-from .setting_local import *
+#from .setting_local import *
 
-# SECRET_KEY = os.environ.get('SECRET_KEY')
+SECRET_KEY = os.environ.get('SECRET_KEY')
 DEBUG = True
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
