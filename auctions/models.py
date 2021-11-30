@@ -173,7 +173,7 @@ class Auction(models.Model):
         )
 
     def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-        if self.current_price == None:
+        if self.current_price is None:
             self.current_price = self.start_price
         super(Auction, self).save()
 

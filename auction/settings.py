@@ -7,9 +7,8 @@ import cloudinary.uploader
 import dj_database_url
 from django.utils import timezone
 
-#from .setting_local import *
+# from .setting_local import *
 
-SECRET_KEY = os.getenv('SECRET_KEY')
 DEBUG = True
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -17,12 +16,14 @@ BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
 
 ALLOWED_HOSTS = ['*']
 
+SECRET_KEY = '@w9*-uh-$h=6ynfr*)ccidcm(adt%*rl!!h*ggh-bb2uwa)cy-'
+
 # MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # MEDIA_URL = '/media/'
 CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': "hinwj35ai",
-    'API_KEY': "834215971652556",
-    'API_SECRET': "OKthl0guiMc6ko_9vc-XuMA9LLQ"
+    'CLOUD_NAME': os.getenv('CLOUDINARY_CLOUD_NAME'),
+    'API_KEY': os.getenv('CLOUDINARY_API_KEY'),
+    'API_SECRET': os.getenv('CLOUDINARY_API_SECRET'),
 }
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
