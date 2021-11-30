@@ -9,7 +9,7 @@ from django.utils import timezone
 
 #from .setting_local import *
 
-SECRET_KEY = os.environ.get('SECRET_KEY', '@w9*-uh-$h=6ynfr*)ccidcm(adt%*rl!!h*ggh-bb2uwa)cy-')
+SECRET_KEY = os.getenv('SECRET_KEY')
 DEBUG = True
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
