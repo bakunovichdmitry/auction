@@ -76,13 +76,15 @@ class Auction(models.Model):
     updated = models.DateTimeField(auto_now=True)
 
     @transaction.atomic
-    def buy_item_now(self, user):
+    def buy_item_now(self):
         if self.status == AuctionStatusChoice.CLOSED.value:
             raise ValueError
 
-        self.close(user)
+        if self.current_price > self.buy_item_now:
+            raise ValueError
 
         self.current_price = self.buy_now_price
+        self.close()
 
         self.save(
             update_fields=(
@@ -104,6 +106,7 @@ class Auction(models.Model):
         self.current_price += raise_price
 
         previous_offer = self.history.last()
+        print(previous_offer.user.email)
         if previous_offer:
             transaction.on_commit(
                 lambda: send_reject_email.delay(
@@ -137,12 +140,15 @@ class Auction(models.Model):
         )
 
     @transaction.atomic
-    def close(self, user=None, send_mail=False):
+    def close(self, user=None):
         self.status = AuctionStatusChoice.CLOSED.value
-        if send_mail and user:
-            transaction.on_commit(
-                lambda: send_sale_email(user.email)
-            )
+        # user_email = self.history.last()
+        # if last_offer or user:
+        #     transaction.on_commit(
+        #         lambda: send_sale_email(
+        #             last_offer.user.email
+        #         )
+        #     )
 
         self.save(
             update_fields=(
@@ -172,10 +178,10 @@ class Auction(models.Model):
             user=user
         )
 
-    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+    def save(self, *args, **kwargs):
         if self.current_price is None:
             self.current_price = self.start_price
-        super(Auction, self).save()
+        super(Auction, self).save(*args, **kwargs)
 
 
 class AuctionHistory(models.Model):

@@ -34,6 +34,11 @@ resource "heroku_addon" "cloudinary" {
   plan = "cloudinary:starter"
 }
 
+resource "heroku_addon" "mailgun" {
+  app = heroku_app.itechart-auction.id
+  plan = "mailgun:starter"
+}
+
 resource "heroku_build" "itechart-auction" {
   app = heroku_app.itechart-auction.id
 

@@ -9,7 +9,7 @@ from django.utils import timezone
 
 # from .setting_local import *
 
-DEBUG = True
+DEBUG = False
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
@@ -45,11 +45,17 @@ DATABASES['default'].update(db_from_env)
 
 # EMAIL
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_HOST = os.environ.get('MAILGUN_SMTP_SERVER')
+# EMAIL_PORT = os.environ.get('MAILGUN_SMTP_PORT')
+# EMAIL_HOST_USER = os.environ.get('MAILGUN_SMTP_LOGIN')
+# EMAIL_HOST_PASSWORD = os.environ.get('MAILGUN_SMTP_PASSWORD')
+EMAIL_USE_TLS = True
+
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_HOST_USER = 'auctiondjango@gmail.com'
-EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+EMAIL_HOST_PASSWORD = 'AuctionDjango123'
 EMAIL_PORT = 587
-EMAIL_USE_TLS = True
+
 
 INSTALLED_APPS = [
     # Local Apps
@@ -88,6 +94,8 @@ MIDDLEWARE = [
 
     # Third-Party Middleware
     'corsheaders.middleware.CorsMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
+
 ]
 
 ROOT_URLCONF = 'auction.urls'
@@ -159,6 +167,12 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
+# Extra places for collectstatic to find static files.
+STATICFILES_DIRS = (
+    os.path.join(BASE_DIR, 'static'),
+)
+
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 # Celery
 
 CELERY_BROKER_URL = os.environ.get('HEROKU_REDIS_YELLOW_URL', 'redis://redis:6379')
