@@ -14,7 +14,7 @@ jobs:
     steps:
       - uses: "actions/checkout@v2"
       - name: Set DJANGO_MODULE_SETTINGS
-          run: export DJANGO_SETTINGS_MODULE="auction.development_settings"
+        run: export DJANGO_SETTINGS_MODULE="auction.development_settings"
       - name: Build docker-compose
         run: docker-compose up -d --build
       - name: Migrate database
