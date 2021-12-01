@@ -9,8 +9,7 @@ terraform {
   required_version = ">= 0.14"
 }
 
-provider "heroku" {
-}
+provider "heroku" {}
 
 resource "heroku_app" "itechart-auction" {
   name = "itechart-auction"

@@ -6,7 +6,7 @@ def _send_reject_email(email):
     send_mail(
         'offer',
         'u office was rejected',
-        'auctiondjango@gmail.com',
+        settings.EMAIL_SENDER,
         [email]
     )
 

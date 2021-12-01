@@ -17,7 +17,9 @@ class BuyItNowView(APIView):
             Auction,
             pk=unique_id
         )
-        auction.buy_item_now(       )
+        auction.buy_item_now(
+            request.user
+        )
         auction.realtime_update()
         return Response(status=status.HTTP_200_OK)
 

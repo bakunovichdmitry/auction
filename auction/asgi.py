@@ -6,7 +6,7 @@ from django.core.asgi import get_asgi_application
 
 from auctions.routing import ws_urlpatterns
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'auction.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'auction.development_settings')
 
 application = ProtocolTypeRouter({
     "http": get_asgi_application(),

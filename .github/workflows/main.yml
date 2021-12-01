@@ -1,8 +1,7 @@
 name: Auction CI/CD
 env:
-  SECRET_KEY: ${{ secrets.SECRET_KEY }}
-  EMAIL_HOST_PASSWORD: ${{ secrets.EMAIL_HOST_PASSWORD }}
-
+  HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+  HEROKU_EMAIL: ${{ secrets.HEROKU_EMAIL }}
 on:
   push:
     branches:
@@ -24,3 +23,17 @@ jobs:
         run: curl http://localhost:8000/lots/
       - name: Start pytest
         run: docker-compose run web pytest -rP
+  CD:
+    needs: [CI]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+        - name: Terraform Init
+          run: terraform init
+
+        - name: Terraform Apply
+          run: terraform apply -auto-approve
