@@ -20,7 +20,7 @@ jobs:
       - name: Start curl test
         run: curl http://localhost:8000/lots/
       - name: Start pytest
-        run: docker-compose exec web pytest -rP
+        run: docker-compose exec web pytest
   CD:
     needs: [CI]
     runs-on: ubuntu-latest
