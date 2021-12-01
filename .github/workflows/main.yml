@@ -15,11 +15,11 @@ on:
 jobs:
   CI:
     runs-on: ubuntu-latest
+    env:
+      DJANGO_SETTINGS_MODULE: auction.production_settings
     steps:
       - uses: "actions/checkout@v2"
       - name: Build docker-compose
-        env:
-          DJANGO_SETTINGS_MODULE: "auction.production_settings"
         run: docker-compose up -d --build
       - name: Migrate database
         run: docker-compose run --rm --entrypoint='./manage.py migrate' web
