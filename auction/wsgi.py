@@ -11,6 +11,6 @@ import os
 
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'auction.production_settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'auction.development_settings')
 
 application = get_wsgi_application()

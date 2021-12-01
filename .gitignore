@@ -1,4 +1,3 @@
-auction/development_settings.py
 media/
 celerybeat-schedule
 
