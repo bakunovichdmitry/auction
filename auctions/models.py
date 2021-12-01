@@ -76,11 +76,11 @@ class Auction(models.Model):
     updated = models.DateTimeField(auto_now=True)
 
     @transaction.atomic
-    def buy_item_now(self):
+    def buy_item_now(self, user):
         if self.status == AuctionStatusChoice.CLOSED.value:
             raise ValueError
 
-        if self.current_price > self.buy_item_now:
+        if self.current_price > self.buy_now_price:
             raise ValueError
 
         self.current_price = self.buy_now_price
@@ -106,7 +106,7 @@ class Auction(models.Model):
         self.current_price += raise_price
 
         previous_offer = self.history.last()
-        print(previous_offer.user.email)
+
         if previous_offer:
             transaction.on_commit(
                 lambda: send_reject_email.delay(

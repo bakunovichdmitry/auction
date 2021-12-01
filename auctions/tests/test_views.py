@@ -50,7 +50,7 @@ def english_auction(db):
 @pytest.mark.django_db
 def test_buy_it_now(auth_client, english_auction):
     response = auth_client.post(
-        urls.reverse('buy_it_now', args=[english_auction.unique_id]),
+        urls.reverse('buy_it_now', args=[english_auction.unique_id])
     )
     assert response.status_code == 200
     assert Auction.objects.get(pk=english_auction.unique_id).current_price == english_auction.buy_now_price
