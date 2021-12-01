@@ -2,6 +2,8 @@ name: Auction CI/CD
 env:
   HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
   HEROKU_EMAIL: ${{ secrets.HEROKU_EMAIL }}
+  DJANGO_SETTINGS_MODULE: ${{ secrets.DJANGO_SETTINGS_MODULE }}
+  
 on:
   push:
     branches:
@@ -31,9 +33,7 @@ jobs:
         uses: actions/checkout@v2
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
-        with:
-        - name: Terraform Init
-          run: terraform init
-
-        - name: Terraform Apply
-          run: terraform apply -auto-approve
+      - name: Terraform Init
+        run: terraform init
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
