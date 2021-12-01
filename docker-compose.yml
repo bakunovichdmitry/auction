@@ -14,7 +14,7 @@ services:
   web:
     build: .
     environment:
-      - DJANGO_SETTINGS_MODULE=${ secrets.DJANGO_SETTINGS_MODULE }
+      - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE}
     command: python manage.py runserver 0.0.0.0:8000
     volumes:
       - .:/app
