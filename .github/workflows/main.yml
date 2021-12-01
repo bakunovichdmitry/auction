@@ -1,9 +1,7 @@
 name: Auction CI/CD
-#env:
-#  HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
-#  HEROKU_EMAIL: ${{ secrets.HEROKU_EMAIL }}
-#  DJANGO_SETTINGS_MODULE: ${{ secrets.DJANGO_SETTINGS_MODULE }}
-  
+env:
+  DJANGO_SETTINGS_MODULE: auction.production_settings
+
 on:
   push:
     branches:
@@ -15,8 +13,6 @@ on:
 jobs:
   CI:
     runs-on: ubuntu-latest
-    env:
-      DJANGO_SETTINGS_MODULE: auction.production_settings
     steps:
       - uses: "actions/checkout@v2"
       - name: Build docker-compose
