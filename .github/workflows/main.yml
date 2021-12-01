@@ -2,7 +2,8 @@ name: Auction CI/CD
 env:
   SECRET_KEY: ${{ secrets.SECRET_KEY }}
   EMAIL_HOST_PASSWORD: ${{ secrets.EMAIL_HOST_PASSWORD }}
-
+  DJANGO_SETTINGS_MODULE: ${{ secrets.DJANGO_SETTINGS_MODULE }}
+  
 on:
   push:
     branches:
