@@ -9,10 +9,20 @@ terraform {
   required_version = ">= 0.14"
 }
 
+terraform {
+  backend "remote" {
+    organization = "itechart-auction"
+
+    workspaces {
+      name = "gh-actions-auction"
+    }
+  }
+}
+
 provider "heroku" {}
 
 resource "heroku_app" "itechart-auction" {
-  name = "itechart-auction"
+  name = "itechart-auction-2"
   region = "us"
   stack = "container"
 }
