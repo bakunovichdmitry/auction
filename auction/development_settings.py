@@ -1,7 +1,7 @@
 from .settings import *
 
 DEBUG = True
-SECRET_KEY = 'zq-uchd3w=^b6nq!8(#5eamgzqr@s(s)$90h&fx5y!(1y2f88)'
+SECRET_KEY = get_random_secret_key()
 ALLOWED_HOSTS = (
     '*',
 )
