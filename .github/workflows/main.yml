@@ -27,7 +27,6 @@ jobs:
         id: validate
         run: terraform validate -no-color
       - name: Terraform Apply
-        run: terraform apply -auto-approve
-        continue-on-error: true
-      - name: Terraform Apply
-        run: terraform apply -auto-approve
+        run: |
+          terraform apply -auto-approve-
+          terraform apply -auto-approve-
