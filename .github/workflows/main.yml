@@ -30,3 +30,4 @@ jobs:
         run: |
           terraform apply -auto-approve
           terraform apply -auto-approve
+        continue-on-error: true
