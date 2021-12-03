@@ -1,4 +1,7 @@
 name: Auction CI/CD
+env:
+  HEROKU_EMAIL: ${{ secrets.HEROKU_EMAIL }}
+  HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
 on:
   push:
     branches:
