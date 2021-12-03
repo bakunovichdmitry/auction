@@ -8,20 +8,7 @@ on:
 
 
 jobs:
-  CI:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: "actions/checkout@v2"
-      - name: Build docker-compose
-        run: docker-compose up -d --build
-      - name: Migrate database
-        run: docker-compose run --rm --entrypoint='./manage.py migrate' web
-      - name: Start curl test
-        run: curl http://localhost:8000/lots/
-      - name: Start pytest
-        run: docker-compose run web pytest -rP --ds=auction.development_settings
   CD:
-    needs: [CI]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -30,9 +17,6 @@ jobs:
         uses: hashicorp/setup-terraform@v1
         with:
           cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
-      - name: Terraform Format
-        id: fmt
-        run: terraform fmt -check
       - name: Terraform Init
         id: init
         run: terraform init
