@@ -91,7 +91,7 @@ CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            "hosts": [os.environ.get('HEROKU_REDIS_YELLOW_URL', 'redis://redis:6379')],
+            "hosts": [os.environ.get('REDIS_URL', 'redis://redis:6379')],
         },
     },
 }
@@ -128,8 +128,8 @@ USE_L10N = True
 USE_TZ = True
 
 # Celery
-CELERY_BROKER_URL = os.environ.get('HEROKU_REDIS_YELLOW_URL', 'redis://redis:6379')
-CELERY_RESULT_BACKEND = os.environ.get('HEROKU_REDIS_YELLOW_URL', 'redis://redis:6379')
+CELERY_BROKER_URL = os.environ.get('REDIS_URL', 'redis://redis:6379')
+CELERY_RESULT_BACKEND = os.environ.get('REDIS_URL', 'redis://redis:6379')
 CELERY_TIMEZONE = 'Europe/Minsk'
 
 # CORS
