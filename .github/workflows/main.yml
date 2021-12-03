@@ -20,5 +20,5 @@ jobs:
       - name: Start curl test
         run: curl http://localhost:8000/lots/
       - name: Start pytest
-        run: docker-compose exec -T web pytest
+        run: docker-compose run web pytest -rP --ds=auction.development_settings
 

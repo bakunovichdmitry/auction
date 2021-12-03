@@ -1,7 +1,5 @@
 from .settings import *
 
-BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
-
 SECRET_KEY = os.environ.get(
     'SECRET_KEY',
     get_random_secret_key()
@@ -12,7 +10,6 @@ ALLOWED_HOSTS = (
 )
 
 # MEDIA
-
 CLOUDINARY_STORAGE = {
     'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME'),
     'API_KEY': os.environ.get('CLOUDINARY_API_KEY'),
@@ -27,10 +24,7 @@ EMAIL_PORT = os.environ.get('MAILGUN_SMTP_PORT')
 EMAIL_HOST_USER = os.environ.get('MAILGUN_SMTP_LOGIN')
 EMAIL_HOST_PASSWORD = os.environ.get('MAILGUN_SMTP_PASSWORD')
 
-# STATIC FILES
 
-STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 # Extra places for collectstatic to find static files.
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'static'),

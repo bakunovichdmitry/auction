@@ -5,6 +5,8 @@ import dj_database_url
 from django.core.management.utils import get_random_secret_key
 from django.utils import timezone
 
+BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
+
 # DATABASE
 DATABASES = {
     'default': {
@@ -136,3 +138,6 @@ CORS_ALLOW_CREDENTIALS = True
 
 # ENGLISH AUCTION CONSTANTS
 ENGLISH_AUCTION_CLOSE_TIMEDELTA = timezone.timedelta(seconds=20)
+
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
