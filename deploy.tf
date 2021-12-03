@@ -19,7 +19,8 @@ terraform {
   }
 }
 
-provider "heroku" {}
+provider "heroku" {
+}
 
 resource "heroku_app" "itechart-auction" {
   name = "itechart-auction-2"
