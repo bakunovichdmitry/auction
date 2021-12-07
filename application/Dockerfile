@@ -13,6 +13,6 @@ COPY poetry.lock pyproject.toml /app/
 RUN poetry config virtualenvs.create false && poetry install --no-interaction --no-ansi
 
 # Creating folders, and files for a project:
-COPY . /app
+COPY . /app/
 
 RUN python manage.py collectstatic --noinput

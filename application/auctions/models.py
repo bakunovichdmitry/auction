@@ -71,6 +71,7 @@ class Auction(models.Model):
     frequency = models.IntegerField(
         blank=True,
         null=True,
+        default=30
     )
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)

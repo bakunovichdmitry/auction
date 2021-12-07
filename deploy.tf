@@ -12,7 +12,7 @@ terraform {
     organization = "itechart-auction"
 
     workspaces {
-      name = "gh-actions-auction"
+      name = "auction-terraform"
     }
   }
 }
@@ -21,7 +21,7 @@ provider "heroku" {
 }
 
 resource "heroku_app" "itechart-auction" {
-  name = "itechart-auction-2"
+  name = "itechart-auction"
   region = "us"
   stack = "container"
 }
@@ -51,7 +51,7 @@ resource "heroku_build" "itechart-auction" {
   app = heroku_app.itechart-auction.id
 
   source {
-    path = "."
+    path = "application"
   }
 }
 

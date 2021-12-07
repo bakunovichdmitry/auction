@@ -16,6 +16,8 @@ jobs:
     steps:
       - uses: "actions/checkout@v2"
       - name: Build docker-compose
+        run: cd application
+      - name: Build docker-compose
         run: docker-compose up -d --build
       - name: Migrate database
         run: docker-compose run --rm --entrypoint='./manage.py migrate' web
@@ -40,7 +42,4 @@ jobs:
         id: validate
         run: terraform validate -no-color
       - name: Terraform Apply
-        run: |
-          terraform apply -auto-approve
-          terraform apply -auto-approve
-        continue-on-error: true
+        run: terraform apply -auto-approve
