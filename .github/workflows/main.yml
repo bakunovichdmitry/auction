@@ -16,7 +16,10 @@ jobs:
     steps:
       - uses: "actions/checkout@v2"
       - name: test
-        run: cd application
+        run: |
+          pwd
+          cd application
+          pwd
       - name: test2
         run: ls
       - name: Build docker-compose
