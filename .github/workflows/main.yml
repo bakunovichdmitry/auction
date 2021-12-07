@@ -15,8 +15,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: "actions/checkout@v2"
-      - name: Build docker-compose
-        run: cd application
+      - name: test
+        run: ls
       - name: Build docker-compose
         run: docker-compose up -d --build
       - name: Migrate database
