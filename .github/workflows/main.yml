@@ -16,7 +16,9 @@ jobs:
     steps:
       - uses: "actions/checkout@v2"
       - name: test
-        run: ls
+        run: cd application
+      - name: test2
+          run: ls
       - name: Build docker-compose
         run: docker-compose up -d --build
       - name: Migrate database
