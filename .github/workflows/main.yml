@@ -15,21 +15,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: "actions/checkout@v2"
-      - name: test
-        run: |
-          pwd
-          cd application
-          pwd
-      - name: test2
-        run: ls
       - name: Build docker-compose
         run: docker-compose up -d --build
+        work-directory: ./application
       - name: Migrate database
         run: docker-compose run --rm --entrypoint='./manage.py migrate' web
+        work-directory: ./application
       - name: Start curl test
         run: curl http://localhost:8000/lots/
       - name: Start pytest
         run: docker-compose run web pytest -rP --ds=auction.development_settings
+        work-directory: ./application
   CD:
     needs: [CI]
     runs-on: ubuntu-latest
