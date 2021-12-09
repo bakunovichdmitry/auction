@@ -85,7 +85,7 @@ class Auction(models.Model):
             raise ValueError
 
         self.current_price = self.buy_now_price
-        self.close()
+        self.close(user)
 
         self.save(
             update_fields=(
@@ -97,7 +97,7 @@ class Auction(models.Model):
 
     @transaction.atomic
     def make_offer(self, raise_price, user):
-        if self.type != AuctionTypeChoice.ENGLISH.value and self.status == AuctionStatusChoice.CLOSED.value:
+        if self.type:
             raise ValueError
 
         self.closing_date = max(
@@ -143,13 +143,14 @@ class Auction(models.Model):
     @transaction.atomic
     def close(self, user=None):
         self.status = AuctionStatusChoice.CLOSED.value
-        # user_email = self.history.last()
-        # if last_offer or user:
-        #     transaction.on_commit(
-        #         lambda: send_sale_email(
-        #             last_offer.user.email
-        #         )
-        #     )
+
+        last_bet = self.history.last()
+        if last_bet or user:
+            transaction.on_commit(
+                lambda: send_sale_email(
+                    user.email if user else last_bet.user.email
+                )
+            )
 
         self.save(
             update_fields=(

@@ -48,7 +48,6 @@ class MakeOfferView(APIView):
         return Response(status=status.HTTP_200_OK)
 
 
-
 class AuctionHistoryView(generics.ListAPIView):
     queryset = AuctionHistory.objects.select_related('auction', 'user').order_by('-created').all()
     serializer_class = AuctionHistorySerializer
