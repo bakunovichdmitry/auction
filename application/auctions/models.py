@@ -97,7 +97,7 @@ class Auction(models.Model):
 
     @transaction.atomic
     def make_offer(self, raise_price, user):
-        if self.type:
+        if not self.type:
             raise ValueError
 
         self.closing_date = max(
