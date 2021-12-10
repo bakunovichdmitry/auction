@@ -51,7 +51,7 @@ resource "heroku_build" "itechart-auction" {
   app = heroku_app.itechart-auction.id
 
   source {
-    path = "../application"
+    path = "application"
   }
 }
 
