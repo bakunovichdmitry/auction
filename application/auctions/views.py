@@ -15,7 +15,8 @@ class BuyItNowView(APIView):
     def post(self, request, unique_id):
         auction = get_object_or_404(
             Auction,
-            pk=unique_id
+            pk=unique_id,
+            status=AuctionStatusChoice.IN_PROGRESS.value,
         )
         auction.buy_item_now(
             request.user

@@ -78,9 +78,6 @@ class Auction(models.Model):
 
     @transaction.atomic
     def buy_item_now(self, user):
-        if self.status == AuctionStatusChoice.CLOSED.value:
-            raise ValueError
-
         if self.current_price > self.buy_now_price:
             raise ValueError
 
@@ -129,6 +126,7 @@ class Auction(models.Model):
     def update_dutch_price(self):
         if self.type:
             raise ValueError
+
         self.current_price -= self.step
         if self.current_price < self.end_price:
             raise ValueError
