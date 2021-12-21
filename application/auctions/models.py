@@ -71,18 +71,18 @@ class Auction(models.Model):
     frequency = models.IntegerField(
         blank=True,
         null=True,
+        default=30
     )
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
 
     @transaction.atomic
     def buy_item_now(self, user):
-        if self.status == AuctionStatusChoice.CLOSED.value:
+        if self.current_price > self.buy_now_price:
             raise ValueError
 
-        self.close(user)
-
         self.current_price = self.buy_now_price
+        self.close(user)
 
         self.save(
             update_fields=(
@@ -94,7 +94,7 @@ class Auction(models.Model):
 
     @transaction.atomic
     def make_offer(self, raise_price, user):
-        if self.type != AuctionTypeChoice.ENGLISH.value and self.status == AuctionStatusChoice.CLOSED.value:
+        if not self.type:
             raise ValueError
 
         self.closing_date = max(
@@ -104,6 +104,7 @@ class Auction(models.Model):
         self.current_price += raise_price
 
         previous_offer = self.history.last()
+
         if previous_offer:
             transaction.on_commit(
                 lambda: send_reject_email.delay(
@@ -125,6 +126,7 @@ class Auction(models.Model):
     def update_dutch_price(self):
         if self.type:
             raise ValueError
+
         self.current_price -= self.step
         if self.current_price < self.end_price:
             raise ValueError
@@ -137,11 +139,15 @@ class Auction(models.Model):
         )
 
     @transaction.atomic
-    def close(self, user=None, send_mail=False):
+    def close(self, user=None):
         self.status = AuctionStatusChoice.CLOSED.value
-        if send_mail and user:
+
+        last_bet = self.history.last()
+        if last_bet or user:
             transaction.on_commit(
-                lambda: send_sale_email(user.email)
+                lambda: send_sale_email(
+                    user.email if user else last_bet.user.email
+                )
             )
 
         self.save(
@@ -171,6 +177,11 @@ class Auction(models.Model):
             auction=self,
             user=user
         )
+
+    def save(self, *args, **kwargs):
+        if self.current_price is None:
+            self.current_price = self.start_price
+        super(Auction, self).save(*args, **kwargs)
 
 
 class AuctionHistory(models.Model):

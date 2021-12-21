@@ -1,9 +1,7 @@
 name: Auction CI/CD
 env:
-  SECRET_KEY: ${{ secrets.SECRET_KEY }}
-  EMAIL_HOST_PASSWORD: ${{ secrets.EMAIL_HOST_PASSWORD }}
-  DJANGO_SETTINGS_MODULE: ${{ secrets.DJANGO_SETTINGS_MODULE }}
-  
+  HEROKU_EMAIL: ${{ secrets.HEROKU_EMAIL }}
+  HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
 on:
   push:
     branches:
@@ -15,6 +13,9 @@ on:
 jobs:
   CI:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./application
     steps:
       - uses: "actions/checkout@v2"
       - name: Build docker-compose
@@ -24,4 +25,22 @@ jobs:
       - name: Start curl test
         run: curl http://localhost:8000/lots/
       - name: Start pytest
-        run: docker-compose run web pytest -rP
+        run: docker-compose run web pytest -rP --ds=auction.development_settings
+  CD:
+    needs: [CI]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+      - name: Terraform Init
+        id: init
+        run: terraform init
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate -no-color
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
