@@ -4,20 +4,26 @@ services:
     image: postgres
     restart: always # reload when db container is down
     volumes:
-      - .:/app/data/db
+      - postgres-data:/var/lib/postgresql/data
     environment:
       - POSTGRES_DB=auction
       - POSTGRES_USER=admin
       - POSTGRES_PASSWORD=admin
+    ports:
+      - "15432:5432"
+
   redis:
     image: redis
+
   web:
-    build: .
+    build:
+      context: application
+      dockerfile: Dockerfile
     environment:
       - DJANGO_SETTINGS_MODULE
-    command: python manage.py runserver 0.0.0.0:8000
+    command: bash -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
     volumes:
-      - .:/app
+      - ./application:/app
     ports:
       - "8000:8000"
     depends_on:
@@ -25,22 +31,23 @@ services:
   beat:
     restart: always
     build:
-      context: .
+      context: application
+      dockerfile: Dockerfile
     command: celery -A auction beat -l info --max-interval 600
     volumes:
-      - .:/app
+      - ./application:/app
     depends_on:
-      - db
-      - redis
       - web
   celery:
     restart: always
     build:
-      context: .
+      context: application
+      dockerfile: Dockerfile
     command: celery -A auction worker -l info
     volumes:
-      - .:/app
+      - ./application:/app
     depends_on:
-      - db
-      - redis
       - web
+
+volumes:
+  postgres-data:
